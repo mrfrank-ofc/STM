@@ -2,19 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - St. Mary's High School</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://i.ibb.co/6cDkTqRh/mrfrankofc.jpg">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/6cDkTqRh/mrfrankofc.jpg" />
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       :root {
         --primary: #003366;
-        --secondary: #FFD700;
+        --secondary: #ffd700;
         --text-color: #333;
         --bg-light: #ffffff;
         --bg-dark: #1a1a1a;
@@ -276,7 +282,7 @@
     <!-- Header -->
     <header>
       <div class="logo">
-        <img src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg" alt="School Logo">
+        <img src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg" alt="School Logo" />
         St. Mary's High
       </div>
       <button class="menu-btn">
@@ -288,19 +294,25 @@
         <a href="/gallery"><i class="fas fa-images"></i> Gallery</a>
         <a href="/contact"><i class="fas fa-envelope"></i> Contact</a>
         <div class="dropdown">
-          <a href="#"><i class="fas fa-user-graduate"></i> Student Portal <i class="fas fa-caret-down"></i></a>
+          <a href="#"
+            ><i class="fas fa-user-graduate"></i> Student Portal <i class="fas fa-caret-down"></i></a
+          >
           <div class="dropdown-content">
             <a href="/studentlogin"><i class="fas fa-sign-in-alt"></i> Login</a>
             <a href="/studentsignup"><i class="fas fa-user-plus"></i> Sign Up</a>
           </div>
         </div>
         <div class="dropdown">
-          <a href="#"><i class="fas fa-user-tie"></i> Admin Portal <i class="fas fa-caret-down"></i></a>
+          <a href="#"
+            ><i class="fas fa-user-tie"></i> Admin Portal <i class="fas fa-caret-down"></i></a
+          >
           <div class="dropdown-content">
             <a href="/teacherslogin"><i class="fas fa-sign-in-alt"></i> Login</a>
           </div>
         </div>
-        <a href="/apply" class="btn btn-primary"><i class="fas fa-pencil-alt"></i> Apply Now</a>
+        <a href="/apply" class="btn btn-primary"
+          ><i class="fas fa-pencil-alt"></i> Apply Now</a
+        >
       </nav>
     </header>
 
@@ -309,16 +321,16 @@
       <div class="login-form">
         <h2>Student Login</h2>
         <form id="login-form">
-          <input type="email" id="email" placeholder="Email" required>
+          <input type="email" id="email" placeholder="Email" required />
           <div class="password-container">
-            <input type="password" id="password" placeholder="Password" required>
+            <input type="password" id="password" placeholder="Password" required />
             <i class="fas fa-eye" id="toggle-password"></i>
           </div>
           <button type="submit">Login</button>
         </form>
         <!-- Google Login Button with favicon -->
         <button type="button" id="google-login-btn">
-          <img src="https://www.google.com/favicon.ico" alt="Google Favicon">
+          <img src="https://www.google.com/favicon.ico" alt="Google Favicon" />
           Login with Google
         </button>
         <div class="error" id="error-message"></div>
@@ -346,21 +358,16 @@
 
     <!-- Firebase SDK v9 -->
     <script type="module">
-      // Session Maintenance: Check for an existing valid session (within 24 hours)
+      // SESSION MAINTENANCE:
+      // On page load, check if a valid session exists (stored in localStorage as "userSession")
       window.addEventListener("load", () => {
-        const loginTimestamp = localStorage.getItem("loginTimestamp");
-        const studentEmail = localStorage.getItem("studentEmail");
-        if (studentEmail && loginTimestamp) {
-          const now = Date.now();
-          const twentyFourHours = 24 * 60 * 60 * 1000; // 86,400,000 ms
-          if (now - loginTimestamp < twentyFourHours) {
-            // Valid session exists, redirect to dashboard
-            window.location.href = "/dashboard";
-          } else {
-            // Session expired, clear stored data
-            localStorage.removeItem("studentEmail");
-            localStorage.removeItem("loginTimestamp");
-          }
+        const session = JSON.parse(localStorage.getItem("userSession"));
+        if (session && session.expiry && session.expiry > Date.now()) {
+          // Valid session exists, redirect to dashboard
+          window.location.href = "/dashboard.html";
+        } else {
+          // If expired, clear the stored session
+          localStorage.removeItem("userSession");
         }
       });
 
@@ -388,7 +395,7 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // Login with Email/Password
+      // LOGIN WITH EMAIL/PASSWORD
       const loginForm = document.getElementById("login-form");
 
       loginForm.addEventListener("submit", (e) => {
@@ -398,49 +405,48 @@
 
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
-            // Store email and current timestamp for session maintenance
-            localStorage.setItem("studentEmail", email);
-            localStorage.setItem("loginTimestamp", Date.now());
+            // Set session expiration 24 hours from now
+            const expiry = Date.now() + 24 * 60 * 60 * 1000;
+            localStorage.setItem("userSession", JSON.stringify({ email, expiry }));
             Swal.fire({
               icon: "success",
               title: "Login Successful",
               text: "You have logged in successfully."
             }).then(() => {
-              window.location.href = "/dashboard";
+              window.location.href = "/dashboard.html";
             });
           })
           .catch((error) => {
             Swal.fire({
               icon: "error",
               title: "Login Failed",
-              text: error.message,
+              text: error.message
             });
           });
       });
 
-      // Login with Google
+      // LOGIN WITH GOOGLE
       const googleLoginBtn = document.getElementById("google-login-btn");
       googleLoginBtn.addEventListener("click", () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider)
           .then((result) => {
             const user = result.user;
-            // Store email and current timestamp for session maintenance
-            localStorage.setItem("studentEmail", user.email);
-            localStorage.setItem("loginTimestamp", Date.now());
+            const expiry = Date.now() + 24 * 60 * 60 * 1000;
+            localStorage.setItem("userSession", JSON.stringify({ email: user.email, expiry }));
             Swal.fire({
               icon: "success",
               title: "Login Successful",
               text: "You have logged in successfully with Google."
             }).then(() => {
-              window.location.href = "/dashboard";
+              window.location.href = "/dashboard.html";
             });
           })
           .catch((error) => {
             Swal.fire({
               icon: "error",
               title: "Google Login Failed",
-              text: error.message,
+              text: error.message
             });
           });
       });

@@ -347,7 +347,37 @@
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-5px); }
       }
-      /* Responsive Side Menu */
+      /* Welcome Message Animation */
+      #welcomeMessage {
+        font-size: 2.5rem;
+        animation: dropIn 0.8s ease-out;
+      }
+      @keyframes dropIn {
+        0% { transform: translateY(-50px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+      }
+      /* Personal Info Heading */
+      #personal-info h2 {
+        font-size: 2rem;
+      }
+      /* Updates Section - Bell Icon */
+      #updates {
+        position: relative;
+      }
+      #updatesBell {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 1.5rem;
+        animation: shake 0.5s ease-in-out 3;
+      }
+      @keyframes shake {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg); }
+        50% { transform: rotate(0deg); }
+        75% { transform: rotate(-10deg); }
+        100% { transform: rotate(0deg); }
+      }
       @media (max-width: 768px) {
         .side-menu {
           width: 100%;
@@ -406,7 +436,6 @@
           </div>
           <div class="card">
             <h3>Notices</h3>
-            <!-- Updated to show teacher name and date/time -->
             <p id="notices">Loading notices...</p>
           </div>
         </div>
@@ -414,7 +443,7 @@
 
       <!-- Personal Info Page -->
       <section id="personal-info" style="display: none;">
-        <h2>Student Personal Information</h2>
+        <h2 id="personalInfoHeading">Personal Information</h2>
         <div class="form-group">
           <label for="profile-pic">Profile Picture</label>
           <img
@@ -466,7 +495,6 @@
           <label for="address">Address/Location</label>
           <input type="text" id="address" placeholder="Enter your address" />
         </div>
-        <!-- New Fields: Form and Stream/Class -->
         <div class="form-group">
           <label for="form">Form</label>
           <select id="form">
@@ -528,6 +556,7 @@
 
       <!-- Current Updates Section -->
       <section id="updates" style="display: none;">
+        <i class="fas fa-bell" id="updatesBell"></i>
         <h2>Current Updates</h2>
         <div id="updatesList">
           <p>Loading updates...</p>
@@ -573,10 +602,7 @@
         limit
       } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import {
-        getStorage,
-        ref,
-        uploadBytes,
-        getDownloadURL
+        getStorage
       } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
       const firebaseConfig = {
@@ -637,6 +663,8 @@
             // Set welcome message with first-letter capitalized and smiley emoji
             const studentName = capitalize(studentData.firstname);
             document.getElementById("welcomeMessage").textContent = `Hello, ${studentName} 😊`;
+            // Update personal info heading to include student's name
+            document.getElementById("personalInfoHeading").textContent = `Personal Information (${studentData.firstname || "Student"})`;
             // Update current grade card using form and stream; display "Not set" if missing
             if (studentData.form && studentData.stream) {
               document.getElementById("currentGrade").textContent = `${studentData.form} - ${studentData.stream}`;
@@ -780,7 +808,6 @@
           let noticeText = "No notices available.";
           querySnapshot.forEach((docSnap) => {
             const update = docSnap.data();
-            // Show update title plus teacher name and formatted date/time
             noticeText = `${update.updateTitle || "No title"} (Posted by ${update.teacherName || "Unknown"} on ${update.timestamp ? new Date(update.timestamp.seconds * 1000).toLocaleString() : "unknown"})`;
           });
           document.getElementById("notices").textContent = noticeText;
@@ -837,7 +864,6 @@
             lastUpdated: new Date()
           };
           await setDoc(studentRef, studentData, { merge: true });
-          // Use SweetAlert2 for a prettier confirmation alert
           Swal.fire({
             icon: 'success',
             title: 'Success',
@@ -882,7 +908,7 @@
       document.getElementById("logoutBtn").addEventListener("click", logout);
       document.getElementById("changePasswordBtn").addEventListener("click", resetPassword);
 
-      // Updated: Upload new profile picture using FileReader and store as Base64 string in Firestore
+      // Upload new profile picture using FileReader and store as Base64 string in Firestore
       document.getElementById("profilePicInput").addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -893,9 +919,7 @@
           if (!user) return;
           const studentRef = doc(db, "students", user.email);
           try {
-            // Save the Base64 string to Firestore
             await updateDoc(studentRef, { profilePic: base64String });
-            // Update the displayed profile picture
             document.getElementById("profilePic").src = base64String;
             showMessage("Profile picture updated!", "success");
           } catch (error) {
@@ -961,14 +985,13 @@
           : '<i class="fas fa-sun"></i>';
       }
       // Handle Navigation for the "Send Report" Link
-const reportLink = document.querySelector('.menu-links a[href="/report"]');
-
-if (reportLink) {
-  reportLink.addEventListener("click", (e) => {
-    e.preventDefault(); // Prevent default link behavior
-    window.location.href = "/report"; // Redirect to the report page
-  });
-}
+      const reportLink = document.querySelector('.menu-links a[href="/report"]');
+      if (reportLink) {
+        reportLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          window.location.href = "/report";
+        });
+      }
 
       // Auth state observer
       onAuthStateChanged(auth, (user) => {
@@ -982,5 +1005,8 @@ if (reportLink) {
         }
       });
     </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   </body>
 </html>

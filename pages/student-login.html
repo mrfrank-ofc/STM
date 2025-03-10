@@ -346,6 +346,24 @@
 
     <!-- Firebase SDK v9 -->
     <script type="module">
+      // Session Maintenance: Check for an existing valid session (within 24 hours)
+      window.addEventListener("load", () => {
+        const loginTimestamp = localStorage.getItem("loginTimestamp");
+        const studentEmail = localStorage.getItem("studentEmail");
+        if (studentEmail && loginTimestamp) {
+          const now = Date.now();
+          const twentyFourHours = 24 * 60 * 60 * 1000; // 86,400,000 ms
+          if (now - loginTimestamp < twentyFourHours) {
+            // Valid session exists, redirect to dashboard
+            window.location.href = "/dashboard";
+          } else {
+            // Session expired, clear stored data
+            localStorage.removeItem("studentEmail");
+            localStorage.removeItem("loginTimestamp");
+          }
+        }
+      });
+
       // Import Firebase modules
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import {
@@ -380,7 +398,9 @@
 
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
+            // Store email and current timestamp for session maintenance
             localStorage.setItem("studentEmail", email);
+            localStorage.setItem("loginTimestamp", Date.now());
             Swal.fire({
               icon: "success",
               title: "Login Successful",
@@ -405,7 +425,9 @@
         signInWithPopup(auth, provider)
           .then((result) => {
             const user = result.user;
+            // Store email and current timestamp for session maintenance
             localStorage.setItem("studentEmail", user.email);
+            localStorage.setItem("loginTimestamp", Date.now());
             Swal.fire({
               icon: "success",
               title: "Login Successful",

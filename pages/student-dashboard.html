@@ -894,7 +894,7 @@
         }
       };
 
-    /*  // Logout function
+    // Logout function
       const logout = async () => {
         try {
           await signOut(auth);
@@ -903,20 +903,7 @@
           console.error("Logout error:", error);
         }
       };
-*/
-    // SESSION CHECK: Verify that a valid session exists.
-      const session = JSON.parse(localStorage.getItem("userSession"));
-      if (!session || !session.expiry || session.expiry < Date.now()) {
-        // No valid session found; redirect to login.
-        window.location.href = "/login.html";
-      }
 
-      // Logout functionality: Clear session and redirect to login.
-      document.getElementById("logout-btn").addEventListener("click", () => {
-        localStorage.removeItem("userSession");
-        window.location.href = "/login.html";
-      });
-      
       document.getElementById("saveChangesBtn").addEventListener("click", saveStudentData);
       document.getElementById("logoutBtn").addEventListener("click", logout);
       document.getElementById("changePasswordBtn").addEventListener("click", resetPassword);

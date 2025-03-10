@@ -364,7 +364,7 @@
         const session = JSON.parse(localStorage.getItem("userSession"));
         if (session && session.expiry && session.expiry > Date.now()) {
           // Valid session exists, redirect to dashboard
-          window.location.href = "/dashboard.html";
+          window.location.href = "/dashboard";
         } else {
           // If expired, clear the stored session
           localStorage.removeItem("userSession");
@@ -413,7 +413,7 @@
               title: "Login Successful",
               text: "You have logged in successfully."
             }).then(() => {
-              window.location.href = "/dashboard.html";
+              window.location.href = "/dashboard";
             });
           })
           .catch((error) => {
@@ -439,7 +439,7 @@
               title: "Login Successful",
               text: "You have logged in successfully with Google."
             }).then(() => {
-              window.location.href = "/dashboard.html";
+              window.location.href = "/dashboard";
             });
           })
           .catch((error) => {

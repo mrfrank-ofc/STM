@@ -22,6 +22,45 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     /* SUBZERO-MD Inspired CSS */
+    footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem 0;
+}
+
+footer .social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 1rem;
+}
+
+footer .social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #fff;
+  transition: background 0.3s ease;
+}
+
+/* Brand-specific colors */
+footer .social-icons a:nth-child(1) {
+  background-color: #3b5998; /* Facebook Blue */
+}
+footer .social-icons a:nth-child(2) {
+  background-color: #1da1f2; /* Twitter Blue */
+}
+footer .social-icons a:nth-child(3) {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); /* Instagram Gradient */
+}
+footer .social-icons a:nth-child(4) {
+  background-color: #0077b5; /* LinkedIn Blue */
+}
+
     :root {
       --primary: #00B4DB;
       --secondary: #0083B0;
@@ -623,11 +662,13 @@
         : '<i class="fas fa-sun"></i>';
     }
 
-    // Side Menu Toggle
-    function toggleMenu() {
-      const sideMenu = document.querySelector('.side-menu');
-      sideMenu.classList.toggle('active');
-    }
+// Side Menu Toggle
+function toggleMenu() {
+  const sideMenu = document.querySelector('.side-menu');
+  sideMenu.classList.toggle('active');
+}
+window.toggleMenu = toggleMenu; // Expose the function globally
+
   </script>
 </body>
 </html>

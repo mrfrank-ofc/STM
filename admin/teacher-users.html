@@ -166,6 +166,8 @@
       background: var(--primary);
       color: #fff;
     }
+    /* New Columns for Account Info */
+    /* We'll add "Created At" and "Last Login" columns in the header and rows */
     /* Delete Button Styling */
     .action-buttons button {
       padding: 5px 10px;
@@ -285,6 +287,8 @@
             <th>Surname</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Created At</th>
+            <th>Last Login</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -342,8 +346,7 @@
         const admins = [];
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          // Attach document id for deletion
-          data.id = docSnap.id;
+          data.id = docSnap.id; // attach document ID
           if (data.role === "admin") {
             admins.push(data);
           }
@@ -353,6 +356,14 @@
         adminsTableBody.innerHTML = "";
 
         admins.forEach((adminUser, index) => {
+          // Format createdAt and lastLogin if available (assumes Firestore timestamp format)
+          const createdAt = adminUser.createdAt 
+            ? new Date(adminUser.createdAt.seconds * 1000).toLocaleString() 
+            : "N/A";
+          const lastLogin = adminUser.lastLogin 
+            ? new Date(adminUser.lastLogin.seconds * 1000).toLocaleString() 
+            : "N/A";
+
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${index + 1}</td>
@@ -360,6 +371,8 @@
             <td>${adminUser.surname || ""}</td>
             <td>${adminUser.email || ""}</td>
             <td>${adminUser.role || ""}</td>
+            <td>${createdAt}</td>
+            <td>${lastLogin}</td>
             <td class="action-buttons">
               <button onclick="deleteAdmin('${adminUser.id}')">Delete</button>
             </td>
@@ -384,8 +397,10 @@
         }
       }
     }
+    // Attach deleteAdmin function to window for inline onclick
+    window.deleteAdmin = deleteAdmin;
 
-    // Call loadAdminTeachers on page load
+    // Load admin teachers on page load
     loadAdminTeachers();
 
     // Theme Toggle Functionality

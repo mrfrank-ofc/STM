@@ -16,9 +16,23 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg">
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg"
+    />
     <style>
       /* Root Variables & Themes */
       :root {
@@ -299,6 +313,15 @@
         padding: 8px;
         box-sizing: border-box;
       }
+      /* Settings Section - Profile Update */
+      #settings form {
+        max-width: 600px;
+        margin: auto;
+      }
+      #settings .form-group img {
+        display: block;
+        margin-bottom: 10px;
+      }
       /* Footer */
       footer {
         background: var(--glass);
@@ -357,7 +380,11 @@
     <!-- Header -->
     <header>
       <div class="logo">
-        <img src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg" alt="Logo" class="header-logo" />
+        <img
+          src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg"
+          alt="Logo"
+          class="header-logo"
+        />
         St. Mary's High - Teacher Dashboard
       </div>
       <button class="menu-btn" id="menuBtn">
@@ -383,7 +410,9 @@
         <a href="#studentManagement">Student Management</a>
         <a href="/teacherusers">Teacher Records</a>
         <a href="#settings">Settings</a>
-        <a href="/teacherslogin" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="/teacherslogin" id="logoutBtn"
+          ><i class="fas fa-sign-out-alt"></i> Logout</a
+        >
       </div>
     </div>
 
@@ -624,10 +653,40 @@
         <h2><a href="/teacherusers">View Teacher Records</a></h2>
       </section>
 
-      <!-- Settings Section -->
+      <!-- Settings Section - Profile & Personal Info Update -->
       <section id="settings" style="display: none;">
         <h2>Settings</h2>
-        <p>This is the Settings page.</p>
+        <form id="settingsForm">
+          <div class="form-group">
+            <label for="profilePic">Profile Picture</label>
+            <img
+              id="profilePicPreview"
+              src="https://i.ibb.co/yFJryv1y/mrfrankofc.jpg"
+              alt="Profile Picture"
+              style="width:100px; height:100px; border-radius:50%; object-fit: cover; margin-bottom:10px;"
+            />
+            <input type="file" id="profilePic" accept="image/*" />
+          </div>
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" required />
+          </div>
+          <div class="form-group">
+            <label for="surname">Surname</label>
+            <input type="text" id="surname" required />
+          </div>
+          <div class="form-group">
+            <label for="emailInfo">Email</label>
+            <input type="email" id="emailInfo" required />
+          </div>
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" placeholder="Leave blank if not changing" />
+          </div>
+          <div class="form-group">
+            <button type="submit">Save Profile</button>
+          </div>
+        </form>
       </section>
     </div>
 
@@ -640,9 +699,12 @@
         <a href="#"><i class="fab fa-tiktok"></i></a>
       </div>
       <p>
-        <a href="https://wa.me/263719647303?text=hi%20darrell%20i%20would%20want%20you%20to%20create%20me%20a%20site%20like%20that%20of%20st%20marys.%20It%20wonderful" target="_blank" style="color: white; text-decoration: none;">
-          Made By Darrell Mucheri
-        </a>
+        <a
+          href="https://wa.me/263719647303?text=hi%20darrell%20i%20would%20want%20you%20to%20create%20me%20a%20site%20like%20that%20of%20st%20marys.%20It%20wonderful"
+          target="_blank"
+          style="color: white; text-decoration: none;"
+          >Made By Darrell Mucheri</a
+        >
       </p>
       <p>&copy; 2025 St. Mary's High School. All rights reserved.</p>
     </footer>
@@ -658,7 +720,8 @@
       import {
         getAuth,
         signOut,
-        onAuthStateChanged
+        onAuthStateChanged,
+        updatePassword
       } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
       import {
         getFirestore,
@@ -668,10 +731,10 @@
         setDoc,
         addDoc,
         deleteDoc,
-        updateDoc
+        updateDoc,
+        getDoc
       } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      // Firebase configuration and initialization
       const firebaseConfig = {
         apiKey: "AIzaSyAR9J2Wz7Eu8dXRzDG8JNHcymLCUQUPJRo",
         authDomain: "deee-9ab53.firebaseapp.com",
@@ -681,12 +744,12 @@
         appId: "1:399732664479:web:b84ac30e8266cc51761aaa",
         measurementId: "G-524ZPBX42B"
       };
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+
+      const appFirebase = initializeApp(firebaseConfig);
+      const auth = getAuth(appFirebase);
+      const db = getFirestore(appFirebase);
 
       /* --------------------- Teacher Dashboard Functions --------------------- */
-      // Load dynamic teacher stats from Firestore (Total Students, Updates, Grades)
       async function loadTeacherStats() {
         try {
           const studentsSnapshot = await getDocs(collection(db, "students"));
@@ -720,14 +783,13 @@
         }
       }
 
-      // Populate student dropdowns for Attendance and Grades forms
       async function populateStudentDropdowns() {
         try {
           const querySnapshot = await getDocs(collection(db, "students"));
           let options = '<option value="">Select Student</option>';
-          querySnapshot.forEach(docSnap => {
+          querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            options += `<option value="${data.email}">${data.firstname || ''} ${data.surname || ''} (${data.email})</option>`;
+            options += `<option value="${data.email}">${data.firstname || ""} ${data.surname || ""} (${data.email})</option>`;
           });
           document.getElementById("attendanceStudent").innerHTML = options;
           document.getElementById("gradeStudent").innerHTML = options;
@@ -736,7 +798,6 @@
         }
       }
 
-      // Generate attendance table rows dynamically
       function generateAttendanceRows() {
         const attendanceTableBody = document.getElementById("attendanceTableBody");
         let tableRows = "";
@@ -753,7 +814,6 @@
         attendanceTableBody.innerHTML = tableRows;
       }
 
-      // Attendance Form Submission
       document.getElementById("attendanceForm")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const studentEmail = document.getElementById("attendanceStudent").value;
@@ -762,7 +822,7 @@
         const month = document.getElementById("attendanceMonth").value;
         const checkboxes = document.querySelectorAll(".attendanceCheckbox");
         let presentCount = 0;
-        checkboxes.forEach(checkbox => {
+        checkboxes.forEach((checkbox) => {
           if (checkbox.checked) presentCount++;
         });
         const totalDays = checkboxes.length;
@@ -771,8 +831,10 @@
         let attendanceData = {};
         for (let week = 1; week <= 4; week++) {
           attendanceData["week" + week] = {};
-          ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].forEach(day => {
-            const checkbox = document.querySelector(`.attendanceCheckbox[data-week="${week}"][data-day="${day}"]`);
+          ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].forEach((day) => {
+            const checkbox = document.querySelector(
+              `.attendanceCheckbox[data-week="${week}"][data-day="${day}"]`
+            );
             attendanceData["week" + week][day] = checkbox.checked;
           });
         }
@@ -793,7 +855,6 @@
         }
       });
 
-      // Grade Form Submission
       document.getElementById("gradeForm")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const studentEmail = document.getElementById("gradeStudent").value;
@@ -816,7 +877,6 @@
         }
       });
 
-      // Update Form Submission (Add Update/Notice)
       document.getElementById("updateForm")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const teacherName = document.getElementById("teacherName").value;
@@ -839,7 +899,6 @@
         }
       });
 
-      // Load Updates
       async function loadUpdates() {
         try {
           const updatesSnapshot = await getDocs(collection(db, "updates"));
@@ -860,7 +919,8 @@
           document.getElementById("updatesList").innerHTML = "<p>Error loading updates.</p>";
         }
       }
-      window.deleteUpdate = async function(updateId) {
+
+      window.deleteUpdate = async function (updateId) {
         if (confirm("Are you sure you want to delete this update?")) {
           try {
             await deleteDoc(doc(db, "updates", updateId));
@@ -871,9 +931,8 @@
         }
       };
 
-      /* --------------------- Student Management Functions (Admin Code) --------------------- */
+      /* --------------------- Student Management Functions --------------------- */
       let studentsData = [];
-      // Notification helper
       function showNotification(message, type = "notice") {
         const notification = document.getElementById("notification");
         notification.textContent = message;
@@ -883,7 +942,7 @@
           notification.style.display = "none";
         }, 3000);
       }
-      // Load Students for Student Management Section
+
       async function loadStudents() {
         try {
           const querySnapshot = await getDocs(collection(db, "students"));
@@ -893,7 +952,6 @@
             data.id = docSnap.id;
             students.push(data);
           });
-          // Sort students alphabetically by first name
           students.sort((a, b) => {
             const nameA = (a.firstname || "").toLowerCase();
             const nameB = (b.firstname || "").toLowerCase();
@@ -902,7 +960,6 @@
             return 0;
           });
           studentsData = students;
-          // Group students by form and stream (if available)
           const groups = {};
           students.forEach((student) => {
             const groupKey = `${student.form || "Not set"} - ${student.stream || "Not set"}`;
@@ -911,9 +968,7 @@
             }
             groups[groupKey].push(student);
           });
-          // Update total count
           document.getElementById("totalCount").textContent = `Total Students: ${students.length}`;
-          // Render grouped students
           const container = document.getElementById("studentsList");
           container.innerHTML = "";
           for (const group in groups) {
@@ -973,7 +1028,7 @@
           showNotification("Error loading students: " + error.message, "error");
         }
       }
-      // Delete Student
+
       async function deleteStudent(studentId) {
         if (confirm("Are you sure you want to delete this student?")) {
           try {
@@ -986,7 +1041,7 @@
           }
         }
       }
-      // Edit Student - populate modal
+
       function editStudent(studentId) {
         const student = studentsData.find((s) => s.id === studentId);
         if (!student) {
@@ -1006,14 +1061,13 @@
         document.getElementById("editUserPass").value = student.userPass || "";
         document.getElementById("editModal").style.display = "block";
       }
-      // Close modal
+
       document.getElementById("editModalClose").addEventListener("click", () => {
         document.getElementById("editModal").style.display = "none";
       });
       document.getElementById("cancelEdit").addEventListener("click", () => {
         document.getElementById("editModal").style.display = "none";
       });
-      // Handle edit form submission
       document.getElementById("editForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const studentId = document.getElementById("editStudentId").value;
@@ -1041,7 +1095,6 @@
       });
 
       /* --------------------- Navigation & Theme Toggle --------------------- */
-      // Side Menu Controls
       const menuBtn = document.getElementById("menuBtn");
       const sideMenu = document.getElementById("sideMenu");
       const closeBtn = document.getElementById("closeBtn");
@@ -1056,16 +1109,15 @@
           sideMenu.classList.remove("active");
         }
       });
-      // Menu Links - Show corresponding section
       const menuLinks = document.querySelectorAll(".menu-links a");
-      menuLinks.forEach(link => {
+      menuLinks.forEach((link) => {
         link.addEventListener("click", (e) => {
           const targetHref = link.getAttribute("href");
           if (targetHref.startsWith("#")) {
             e.preventDefault();
             const targetId = targetHref.substring(1);
-            document.querySelectorAll("section").forEach(sec => {
-              sec.style.display = (sec.id === targetId) ? "block" : "none";
+            document.querySelectorAll("section").forEach((sec) => {
+              sec.style.display = sec.id === targetId ? "block" : "none";
             });
             sideMenu.classList.remove("active");
             if (targetId === "updates") {
@@ -1079,8 +1131,8 @@
           }
         });
       });
-      // Logout functionality
-      document.getElementById("logoutBtn").addEventListener("click", async () => {
+      document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+        e.preventDefault();
         try {
           await signOut(auth);
           window.location.href = "/teacherslogin";
@@ -1088,7 +1140,6 @@
           console.error("Logout error:", error);
         }
       });
-      // Theme Toggle
       const themeToggle = document.getElementById("themeToggle");
       let isDark = true;
       themeToggle.addEventListener("click", () => {
@@ -1107,12 +1158,12 @@
           ? '<i class="fas fa-moon"></i>'
           : '<i class="fas fa-sun"></i>';
       }
+
       /* --------------------- Auth & Initialization --------------------- */
       onAuthStateChanged(auth, (user) => {
         if (!user) {
-          window.location.href = '/teacherslogin';
+          window.location.href = "/teacherslogin";
         } else {
-          // Extract teacher name from email for welcome message
           const name = user.email.split("@")[0];
           const welcomeMessage = document.getElementById("welcomeMessage");
           welcomeMessage.innerText = `Welcome, ${name}!`;
@@ -1121,7 +1172,81 @@
           populateStudentDropdowns();
           generateAttendanceRows();
           loadTeacherStats();
+          loadTeacherProfile();
         }
+      });
+
+      /* --------------------- Teacher Profile Settings --------------------- */
+      async function loadTeacherProfile() {
+        try {
+          const user = auth.currentUser;
+          if (!user) return;
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("firstName").value = data.firstname || "";
+            document.getElementById("surname").value = data.surname || "";
+            document.getElementById("emailInfo").value = data.email || "";
+            if (data.profilePic) {
+              document.getElementById("profilePicPreview").src = data.profilePic;
+            }
+          }
+        } catch (error) {
+          console.error("Error loading teacher profile:", error);
+        }
+      }
+
+      // Convert selected image to Base64 and update preview
+      document.getElementById("profilePic").addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            document.getElementById("profilePicPreview").src = e.target.result;
+            document.getElementById("profilePicPreview").dataset.base64 = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Handle Settings Form Submission
+      document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) return;
+        const profilePicBase64 =
+          document.getElementById("profilePicPreview").dataset.base64 ||
+          document.getElementById("profilePicPreview").src;
+        const firstname = document.getElementById("firstName").value;
+        const surname = document.getElementById("surname").value;
+        const email = document.getElementById("emailInfo").value;
+        const newPassword = document.getElementById("newPassword").value;
+        const updatedProfile = {
+          profilePic: profilePicBase64,
+          firstname,
+          surname,
+          email
+        };
+        try {
+          await setDoc(doc(db, "users", user.uid), updatedProfile, { merge: true });
+          if (newPassword.trim() !== "") {
+            await updatePassword(user, newPassword);
+          }
+          alert("Profile updated successfully!");
+        } catch (error) {
+          console.error("Error updating profile:", error);
+          alert("Error updating profile: " + error.message);
+        }
+      });
+    </script>
+
+    <script>
+      // Theme toggle (non-module)
+      document.getElementById("themeToggle").addEventListener("click", function () {
+        document.body.classList.toggle("dark-theme");
+        this.querySelector("i").classList.toggle("fa-moon");
+        this.querySelector("i").classList.toggle("fa-sun");
       });
     </script>
   </body>

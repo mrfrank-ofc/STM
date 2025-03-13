@@ -166,8 +166,6 @@
       background: var(--primary);
       color: #fff;
     }
-    /* New Columns for Account Info */
-    /* We'll add "Created At" and "Last Login" columns in the header and rows */
     /* Delete Button Styling */
     .action-buttons button {
       padding: 5px 10px;
@@ -269,8 +267,8 @@
       </button>
     </div>
     <div class="menu-links">
-      <a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-      <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+      <a href="/teachersdashboard"><i class="fas fa-tachometer-alt"></i> Go Back</a>
+      <a href="#settings"><i class="fas fa-cog"></i> Settings</a>
       <a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
   </div>
@@ -430,6 +428,8 @@
       const sideMenu = document.querySelector(".side-menu");
       sideMenu.classList.toggle("active");
     }
+    // Expose toggleMenu to the global scope so that inline onclick works
+    window.toggleMenu = toggleMenu;
   </script>
 </body>
 </html>

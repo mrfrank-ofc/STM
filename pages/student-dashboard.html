@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -21,6 +21,8 @@
       type="image/png"
       href="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg"
     />
+    <!-- Chart.js (Added to fix "Chart not defined" error) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- jsPDF Library and AutoTable Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -240,33 +242,45 @@
       .form-group button:hover {
         background: #002244;
       }
-      /* Report Card & PDF Button */
-      .report-card {
+      /* Part B: Additional Personal Info (Form and Class) */
+      /* (Select options remain unchanged) */
+      /* View Results Section - Updated */
+      #results .report-card,
+      #results #resultsMessage {
         background: var(--glass);
         padding: 1.5rem;
         border-radius: 10px;
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         margin-bottom: 2rem;
+        transition: all 0.5s ease;
       }
-      .report-card h3 {
-        color: var(--primary);
+      #results .report-header {
         margin-bottom: 1rem;
       }
-      .report-card table {
+      #results .report-header p {
+        margin: 0.3rem 0;
+      }
+      #results .report-header p span {
+        font-weight: bold;
+      }
+      #results h3 {
+        margin-bottom: 1rem;
+        color: var(--primary);
+      }
+      #results table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 1rem;
       }
-      .report-card th,
-      .report-card td {
+      #results th,
+      #results td {
         padding: 0.75rem;
         text-align: left;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
-      .report-card th {
+      #results th {
         background: var(--primary);
-        color: white;
+        color: #fff;
       }
       .pdf-btn {
         display: inline-block;
@@ -282,7 +296,32 @@
       }
       .pdf-btn:hover {
         transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      .chart-container {
+        width: 100%;
+        height: 300px;
+        margin-top: 1rem;
+      }
+      /* Results Message (for unpaid fees) */
+      #resultsMessage {
+        text-align: center;
+        font-size: 1.2rem;
+        padding: 1rem;
+        border: 1px solid var(--primary);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      #resultsMessage.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      /* Make teacher comments text green */
+      #reportTeacherComments {
+        color: green;
       }
       /* Updates/Notices Section */
       .notice-card {
@@ -290,7 +329,7 @@
         padding: 1rem;
         border-radius: 8px;
         margin-bottom: 1rem;
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
       .notice-card small {
         font-size: 0.9rem;
@@ -326,7 +365,7 @@
         border-radius: 50%;
         background: var(--glass);
         backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -488,13 +527,13 @@
           <select id="gender">
             <option value="male">Male</option>
             <option value="female">Female</option>
-           <!-- <option value="other">Other</option>-->
           </select>
         </div>
         <div class="form-group">
           <label for="address">Address/Location</label>
           <input type="text" id="address" placeholder="Enter your address" />
         </div>
+        <!-- Part B: Additional form groups for updating personal info -->
         <div class="form-group">
           <label for="form">Form</label>
           <select id="form">
@@ -527,15 +566,20 @@
         </div>
       </section>
 
-      <!-- View Results Page -->
+      <!-- View Results Page (Updated) -->
       <section id="results" style="display: none;">
         <h2>View Results</h2>
-        <div class="report-card">
+        <!-- Message for unpaid fees -->
+        <div id="resultsMessage"></div>
+        <!-- Report card container (only shown if fees are paid) -->
+        <div class="report-card" id="reportCardContainer" style="display: none;">
           <div class="report-header">
             <p>Name: <span id="reportName"></span></p>
             <p>Email: <span id="reportEmail"></span></p>
             <p>Year: <span id="reportYear"></span></p>
             <p>Term: <span id="reportTerm"></span></p>
+            <p>Teacher: <span id="reportTeacherName"></span></p>
+            <p>Comments: <span id="reportTeacherComments"></span></p>
           </div>
           <h3>Report Card</h3>
           <table>
@@ -551,6 +595,9 @@
             </tbody>
           </table>
           <button class="pdf-btn" onclick="exportPDF()">Download PDF</button>
+          <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+          </div>
         </div>
       </section>
 
@@ -601,9 +648,7 @@
         getDocs,
         limit
       } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import {
-        getStorage
-      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+      import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyAR9J2Wz7Eu8dXRzDG8JNHcymLCUQUPJRo",
@@ -636,6 +681,35 @@
       function capitalize(s) {
         if (!s) return "";
         return s.charAt(0).toUpperCase() + s.slice(1);
+      }
+
+      // Function to update the performance chart using Chart.js
+      function updateChart(marksData) {
+        const ctx = document.getElementById("performanceChart").getContext("2d");
+        const subjects = Object.keys(marksData);
+        const marks = subjects.map(subject => marksData[subject].marks);
+        // If a previous chart exists, destroy it
+        if (window.performanceChartInstance) {
+          window.performanceChartInstance.destroy();
+        }
+        window.performanceChartInstance = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: subjects,
+            datasets: [{
+              label: "Marks",
+              data: marks,
+              backgroundColor: "rgba(255, 215, 0, 0.5)",
+              borderColor: "rgba(255, 215, 0, 1)",
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
       }
 
       // Fetch student data for Personal Info and update dashboard grade card
@@ -695,7 +769,21 @@
             const studentData = studentSnap.data();
             const marks = studentData.marks || {};
 
-            // Update report header
+            // Check if fees have been paid; if not, display a styled message with transitions
+            if (!studentData.feesPaid) {
+              const resultsMessage = document.getElementById("resultsMessage");
+              resultsMessage.textContent =
+                `Dear ${studentData.firstname}, you have a fees balance of ${studentData.feesBalance} as of ${studentData.year || "N/A"} ${studentData.term || "N/A"}. Please pay to view results. 
+Cc Team St Mary's Admin.`;
+              resultsMessage.classList.add("show");
+              document.getElementById("reportCardContainer").style.display = "none";
+              return;
+            } else {
+              document.getElementById("resultsMessage").classList.remove("show");
+              document.getElementById("reportCardContainer").style.display = "block";
+            }
+
+            // Update report header with teacher details as well
             document.getElementById("reportName").textContent =
               `${studentData.firstname || ""} ${studentData.surname || ""}`;
             document.getElementById("reportEmail").textContent =
@@ -704,6 +792,10 @@
               studentData.year || "Not set";
             document.getElementById("reportTerm").textContent =
               studentData.term || "Not set";
+            document.getElementById("reportTeacherName").textContent =
+              studentData.teacherName || "N/A";
+            document.getElementById("reportTeacherComments").textContent =
+              studentData.teacherComments || "N/A";
 
             // Clear existing rows
             const reportCardBody = document.getElementById("reportCardBody");
@@ -736,6 +828,9 @@
               reportCardBody.innerHTML =
                 "<tr><td colspan='3'>No marks available.</td></tr>";
             }
+
+            // Update performance graph using the new updateChart function
+            updateChart(marks);
           } else {
             document.getElementById("reportCardBody").innerHTML =
               "<tr><td colspan='3'>No data found.</td></tr>";
@@ -756,12 +851,16 @@
         const email = document.getElementById("reportEmail").textContent;
         const year = document.getElementById("reportYear").textContent;
         const term = document.getElementById("reportTerm").textContent;
+        const teacherName = document.getElementById("reportTeacherName").textContent;
+        const teacherComments = document.getElementById("reportTeacherComments").textContent;
 
         doc.setFontSize(12);
         doc.text(`Name: ${name}`, 14, 15);
         doc.text(`Email: ${email}`, 14, 25);
         doc.text(`Year: ${year}`, 14, 35);
         doc.text(`Term: ${term}`, 14, 45);
+        doc.text(`Teacher: ${teacherName}`, 14, 55);
+        doc.text(`Comments: ${teacherComments}`, 14, 65);
 
         // Prepare table rows from reportCardBody
         let rows = [];
@@ -775,7 +874,7 @@
         doc.autoTable({
           head: [["Subject", "Marks", "Grade"]],
           body: rows,
-          startY: 55,
+          startY: 75,
         });
 
         // Generate a serial number based on current timestamp
@@ -894,7 +993,7 @@
         }
       };
 
-    // Logout function
+      // Logout function
       const logout = async () => {
         try {
           await signOut(auth);

@@ -21,15 +21,15 @@
       type="image/png"
       href="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg"
     />
-    <!-- Chart.js (for performance graph) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- jsPDF Library and AutoTable Plugin -->
+    <!-- jsPDF and AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      /* Basic and color variables */
+      /* Basic Colors and Variables */
       :root {
         --primary: #003366;
         --secondary: #ffd700;
@@ -52,7 +52,7 @@
         box-sizing: border-box;
         font-family: "Poppins", sans-serif;
       }
-      /* Fade-in animation for sections */
+      /* Fade-in Animation */
       .fade-in {
         animation: fadeIn 0.5s ease-in-out;
       }
@@ -61,8 +61,6 @@
         to { opacity: 1; }
       }
       body {
-        overflow: auto;
-        user-select: none;
         background: var(--bg-gradient);
         color: var(--text-color);
         min-height: 100vh;
@@ -82,9 +80,6 @@
         transition: opacity 0.8s ease;
         z-index: 100;
       }
-      body.scrolled::after {
-        opacity: 1;
-      }
       /* Header */
       header {
         background: var(--glass);
@@ -98,7 +93,6 @@
         top: 0;
         z-index: 1000;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.4s ease;
       }
       .logo {
         font-size: 1.8rem;
@@ -106,15 +100,14 @@
         background: linear-gradient(to right, var(--primary), var(--secondary));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: logoFloat 4s ease-in-out infinite;
         display: flex;
         align-items: center;
+        animation: logoFloat 4s ease-in-out infinite;
       }
       .header-logo {
         height: 40px;
         margin-right: 10px;
       }
-      /* Side Menu */
       .menu-btn {
         font-size: 1.5rem;
         cursor: pointer;
@@ -123,21 +116,31 @@
         color: var(--text-color);
         padding: 10px;
       }
+      /* Side Menu and Overlay */
+      #menuOverlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9998;
+        transition: opacity 0.3s ease;
+      }
       .side-menu {
         position: fixed;
         top: 0;
-        right: -300px;
+        right: 0;
         width: 300px;
-        height: 100%;
+        height: 100vh;
         background: var(--glass);
         backdrop-filter: blur(20px);
         padding: 2rem;
-        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 2000;
         border-left: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 9999;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
       }
       .side-menu.active {
-        right: 0;
+        transform: translateX(0);
       }
       .menu-header {
         display: flex;
@@ -168,7 +171,7 @@
       .menu-links a:hover {
         background: rgba(255, 255, 255, 0.1);
       }
-      /* Main Content */
+      /* Main Container */
       .container {
         padding: 180px 5% 100px;
         margin-top: 80px;
@@ -204,10 +207,7 @@
         font-size: 1.2rem;
         color: var(--text-color);
       }
-      /* Attendance Card */
-      .card.attendance {
-        position: relative;
-      }
+      /* Attendance */
       .attendance-bar {
         width: 100%;
         background: rgba(255, 255, 255, 0.2);
@@ -221,7 +221,7 @@
         background: var(--secondary);
         transition: width 0.5s ease;
       }
-      /* Personal Info Form */
+      /* Personal Info */
       .profile-pic {
         width: 150px;
         height: 150px;
@@ -269,7 +269,7 @@
       .form-group button:hover {
         background: #002244;
       }
-      /* Extra fields for Health Issues and Additional Information */
+      /* Extra Info */
       .extra-info {
         margin-top: 1rem;
       }
@@ -277,9 +277,23 @@
         font-weight: 500;
         color: var(--primary);
       }
-      /* View Results Section */
-      #results .report-card,
-      #results #resultsMessage {
+      /* View Results */
+      #resultsMessage {
+        text-align: center;
+        font-size: 1.2rem;
+        padding: 1rem;
+        border: 1px solid var(--primary);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      #resultsMessage.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .report-card {
         background: var(--glass);
         padding: 1.5rem;
         border-radius: 10px;
@@ -288,37 +302,28 @@
         margin-bottom: 2rem;
         transition: all 0.5s ease;
       }
-      #results .report-header {
-        margin-bottom: 1rem;
-      }
-      #results .report-header p {
-        margin: 0.3rem 0;
-      }
-      #results .report-header p span {
-        font-weight: bold;
-      }
-      #results h3 {
-        margin-bottom: 1rem;
+      .report-card h3 {
         color: var(--primary);
+        margin-bottom: 1rem;
       }
-      /* Update the table to include a Performance column */
-      #results table {
+      .report-card table {
         width: 100%;
         border-collapse: collapse;
       }
-      #results th,
-      #results td {
+      .report-card th,
+      .report-card td {
         padding: 0.75rem;
         text-align: left;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
-      #results th {
+      .report-card th {
         background: var(--primary);
         color: #fff;
       }
-      /* Zebra stripes for report card table */
-      #results table tr:nth-child(even) {
-        background: rgba(0, 0, 0, 0.1);
+      .highlight-comments {
+        background: rgba(0, 255, 0, 0.1);
+        padding: 2px 4px;
+        border-radius: 4px;
       }
       .pdf-btn {
         display: inline-block;
@@ -341,34 +346,11 @@
         height: 300px;
         margin-top: 1rem;
       }
-      /* Results Message (for unpaid fees) */
-      #resultsMessage {
-        text-align: center;
-        font-size: 1.2rem;
-        padding: 1rem;
-        border: 1px solid var(--primary);
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        transform: translateY(-20px);
-        transition: opacity 0.5s ease, transform 0.5s ease;
-      }
-      #resultsMessage.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      /* Highlight teacher comments */
-      .highlight-comments {
-        background: rgba(0, 255, 0, 0.1);
-        padding: 2px 4px;
-        border-radius: 4px;
-      }
       /* Updates Section */
       #updates h2 {
         color: var(--primary);
         margin-bottom: 1rem;
       }
-      /* Bell icon with badge */
       #updates h2 i#updatesBell {
         margin-right: 10px;
         vertical-align: middle;
@@ -399,14 +381,25 @@
         animation: slideIn 0.5s forwards;
       }
       @keyframes slideIn {
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        to { opacity: 1; transform: translateY(0); }
       }
       .notice-card small {
         font-size: 0.9rem;
         color: var(--text-color);
+      }
+      /* Mark All as Read Button */
+      #markAllReadBtn {
+        padding: 8px 16px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-bottom: 10px;
+      }
+      #markAllReadBtn:hover {
+        background: #002244;
       }
       /* Footer */
       footer {
@@ -459,7 +452,7 @@
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-5px); }
       }
-      /* Welcome Message Animation */
+      /* Welcome Message */
       #welcomeMessage {
         font-size: 2.5rem;
         animation: dropIn 0.8s ease-out;
@@ -472,7 +465,7 @@
       #personal-info h2 {
         font-size: 2rem;
       }
-      /* Additional fields styling */
+      /* Extra fields */
       .extra-info {
         margin-top: 1rem;
       }
@@ -484,46 +477,52 @@
       @media (max-width: 768px) {
         .side-menu {
           width: 100%;
-          right: -100%;
+          transform: translateX(100%);
         }
       }
     </style>
   </head>
   <body>
+    <!-- Overlay for side menu -->
+    <div id="menuOverlay"></div>
     <!-- Header -->
     <header>
       <div class="logo fade-in">
-        <img src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg" alt="Logo" class="header-logo" />
+        <img
+          src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg"
+          alt="Logo"
+          class="header-logo"
+        />
         St. Mary's High
       </div>
-      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+      <button class="menu-btn fade-in" id="menuBtn">
+        <i class="fas fa-bars"></i>
+      </button>
     </header>
-
     <!-- Side Menu -->
     <div class="side-menu fade-in" id="sideMenu">
       <div class="menu-header">
         <h3>Menu</h3>
-        <button class="close-btn" id="closeBtn"><i class="fas fa-times"></i></button>
+        <button class="close-btn" id="closeBtn">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <div class="menu-links">
         <a href="#dashboard-home"><i class="fas fa-home"></i> Dashboard</a>
         <a href="#personal-info"><i class="fas fa-user"></i> Personal Info</a>
         <a href="#results"><i class="fas fa-chart-bar"></i> View Results</a>
         <a href="#updates">
-          <i class="fas fa-bell" id="updatesBell"></i>
-          Current Updates
+          <i class="fas fa-bell" id="updatesBell"></i> Current Updates
           <span id="updateCount"></span>
         </a>
         <a href="/report"><i class="fas fa-share"></i> Send Report</a>
         <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </div>
     </div>
-
-    <!-- Main Content -->
+    <!-- Main Container -->
     <div class="container fade-in">
       <!-- Message Box -->
       <div id="messageBox"></div>
-
       <!-- Dashboard Home -->
       <section id="dashboard-home" class="fade-in">
         <h2 id="welcomeMessage">Hello, Student 😊</h2>
@@ -545,15 +544,19 @@
           </div>
         </div>
       </section>
-
       <!-- Personal Info Page -->
       <section id="personal-info" class="fade-in" style="display: none;">
         <h2 id="personalInfoHeading">Personal Information</h2>
         <div class="form-group">
           <label for="profile-pic">Profile Picture</label>
-          <img src="https://i.postimg.cc/28gm27sy/2993763.png" alt="Profile Picture" class="profile-pic" id="profilePic" />
+          <img
+            src="https://i.postimg.cc/28gm27sy/2993763.png"
+            alt="Profile Picture"
+            class="profile-pic"
+            id="profilePic"
+          />
           <input type="file" id="profilePicInput" accept="image/*" />
-          <!-- Progress bar with percentage -->
+          <!-- Progress bar -->
           <div id="uploadProgress" style="display:none; margin-top:5px; background: #ccc; border-radius: 5px;">
             <div id="progressBar" style="height: 10px; width: 0%; background: green; border-radius: 5px;"></div>
           </div>
@@ -608,7 +611,7 @@
           <label for="additionalInfo">Additional Information</label>
           <textarea id="additionalInfo" placeholder="Enter any additional information..."></textarea>
         </div>
-        <!-- Part B: Additional Personal Info -->
+        <!-- Additional Personal Info -->
         <div class="form-group">
           <label for="form">Form</label>
           <select id="form">
@@ -640,13 +643,12 @@
           <button id="changePasswordBtn">Reset Password</button>
         </div>
       </section>
-
-      <!-- View Results Page -->
+      <!-- View Results Section -->
       <section id="results" class="fade-in" style="display: none;">
         <h2>View Results</h2>
-        <!-- Message for unpaid fees -->
+        <!-- Unpaid fees message -->
         <div id="resultsMessage"></div>
-        <!-- Report card container (only shown if fees are paid) -->
+        <!-- Report Card Container (shown if fees paid) -->
         <div class="report-card" id="reportCardContainer" style="display: none;">
           <div class="report-header">
             <p>Name: <span id="reportName"></span></p>
@@ -667,7 +669,7 @@
               </tr>
             </thead>
             <tbody id="reportCardBody">
-              <!-- Report rows will be inserted here -->
+              <!-- Report rows inserted here -->
             </tbody>
           </table>
           <button class="pdf-btn" onclick="exportPDF()">Download PDF</button>
@@ -676,19 +678,19 @@
           </div>
         </div>
       </section>
-
       <!-- Current Updates Section -->
       <section id="updates" class="fade-in" style="display: none;">
         <h2>
           <i class="fas fa-bell" id="updatesBell"></i> Current Updates
           <span id="updateCount"></span>
         </h2>
+        <!-- Mark All as Read Button -->
+        <button id="markAllReadBtn">Mark all as read</button>
         <div id="updatesList">
           <p>Loading updates...</p>
         </div>
       </section>
     </div>
-
     <!-- Footer -->
     <footer class="fade-in">
       <div class="social-icons">
@@ -699,12 +701,10 @@
       </div>
       <p>&copy; 2025 St. Mary's High School. All rights reserved.</p>
     </footer>
-
     <!-- Theme Toggle -->
     <div class="theme-toggle fade-in" id="themeToggle">
       <i class="fas fa-moon"></i>
     </div>
-
     <!-- Firebase and App Scripts -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -724,10 +724,12 @@
         query,
         orderBy,
         getDocs,
-        limit
+        limit,
+        arrayUnion
       } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+      // Replace with your actual Firebase config
       const firebaseConfig = {
         apiKey: "AIzaSyAR9J2Wz7Eu8dXRzDG8JNHcymLCUQUPJRo",
         authDomain: "deee-9ab53.firebaseapp.com",
@@ -743,7 +745,7 @@
       const db = getFirestore(appFirebase);
       const storage = getStorage(appFirebase);
 
-      // Utility: Show message in message box
+      // Utility: Show message
       function showMessage(message, type) {
         const messageBox = document.getElementById("messageBox");
         messageBox.textContent = message;
@@ -757,8 +759,7 @@
 
       // Utility: Capitalize first letter
       function capitalize(s) {
-        if (!s) return "";
-        return s.charAt(0).toUpperCase() + s.slice(1);
+        return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
       }
 
       // Update performance chart
@@ -781,16 +782,12 @@
               borderWidth: 1
             }]
           },
-          options: {
-            scales: {
-              y: { beginAtZero: true }
-            }
-          }
+          options: { scales: { y: { beginAtZero: true } } }
         });
       }
 
-      // Fetch student data and update dashboard info
-      const fetchStudentData = async (email) => {
+      // Fetch student data and update UI
+      async function fetchStudentData(email) {
         try {
           const studentRef = doc(db, "students", email);
           const docSnap = await getDoc(studentRef);
@@ -803,26 +800,24 @@
             document.getElementById("parent-name").value = studentData.parentName || "";
             document.getElementById("parent-phone").value = studentData.parentPhone || "";
             document.getElementById("dob").value = studentData.dob || "";
-            document.getElementById("gender").value = studentData.gender || "male";
+            document.getElementById("gender").value = studentData.gender || "";
             document.getElementById("address").value = studentData.address || "";
-            document.getElementById("form").value = studentData.form || "";
-            document.getElementById("stream").value = studentData.stream || "";
             document.getElementById("healthIssues").value = studentData.healthIssues || "";
             document.getElementById("additionalInfo").value = studentData.additionalInfo || "";
+            document.getElementById("form").value = studentData.form || "";
+            document.getElementById("stream").value = studentData.stream || "";
             document.getElementById("profilePic").src =
-              studentData.profilePic ||
-              "https://i.ibb.co/ynzs0qc2/subzero-bot.jpg";
+              studentData.profilePic || "https://i.postimg.cc/28gm27sy/2993763.png";
             document.getElementById("studentDisplayName").textContent = studentData.firstname || "";
             const studentName = capitalize(studentData.firstname);
             document.getElementById("welcomeMessage").textContent = `Hello, ${studentName} 😊`;
-            document.getElementById("personalInfoHeading").textContent = `Personal Information (${studentData.firstname || "Student"})`;
+            document.getElementById("personalInfoHeading").textContent = `Personal Information (${studentName})`;
             if (studentData.form && studentData.stream) {
               document.getElementById("currentGrade").textContent = `${studentData.form} - ${studentData.stream}`;
             } else {
               document.getElementById("currentGrade").textContent = "Not set";
-              showMessage("Your personal info is incomplete. Please update your grade & class info in your profile.", "error");
+              showMessage("Your personal info is incomplete. Please update your profile.", "error");
             }
-            // Update attendance progress if available
             if (studentData.attendance !== undefined) {
               const attendanceProgress = document.getElementById("attendanceProgress");
               attendanceProgress.style.width = studentData.attendance + "%";
@@ -841,10 +836,10 @@
           console.error("Error fetching student data:", error);
           showMessage("Error fetching student data: " + error.message, "error");
         }
-      };
+      }
 
       // Load results and update report card
-      const loadResults = async () => {
+      async function loadResults() {
         try {
           const studentEmail = auth.currentUser.email;
           const studentRef = doc(db, "students", studentEmail);
@@ -852,7 +847,6 @@
           if (studentSnap.exists()) {
             const studentData = studentSnap.data();
             const marks = studentData.marks || {};
-            // Check fees status and show message if unpaid
             if (!studentData.feesPaid) {
               const resultsMessage = document.getElementById("resultsMessage");
               resultsMessage.innerHTML = `
@@ -867,28 +861,25 @@
               document.getElementById("resultsMessage").classList.remove("show");
               document.getElementById("reportCardContainer").style.display = "block";
             }
-            document.getElementById("reportName").textContent = `${studentData.firstname || ""} ${studentData.surname || ""}`;
+            document.getElementById("reportName").textContent = `${capitalize(studentData.firstname)} ${capitalize(studentData.surname)}`;
             document.getElementById("reportEmail").textContent = studentData.email || "";
             document.getElementById("reportYear").textContent = studentData.year || "Not set";
             document.getElementById("reportTerm").textContent = studentData.term || "Not set";
             document.getElementById("reportTeacherName").textContent = studentData.teacherName || "N/A";
             document.getElementById("reportTeacherComments").textContent = studentData.teacherComments || "N/A";
-            // Highlight teacher comments if available
-            if(studentData.teacherComments && studentData.teacherComments !== "N/A") {
+            if (studentData.teacherComments && studentData.teacherComments !== "N/A") {
               document.getElementById("reportTeacherComments").classList.add("highlight-comments");
             } else {
               document.getElementById("reportTeacherComments").classList.remove("highlight-comments");
             }
-            const reportCardBody = document.getElementById("reportCardBody");
-            reportCardBody.innerHTML = "";
-            let totalMarks = 0;
-            let subjectCount = 0;
-            // For each subject, add an extra cell for performance icon
+            const tbody = document.getElementById("reportCardBody");
+            tbody.innerHTML = "";
+            let totalMarks = 0, count = 0;
             for (const [subject, data] of Object.entries(marks)) {
               let performanceIcon = "";
-              if(Number(data.marks) >= 90) {
+              if (Number(data.marks) >= 90) {
                 performanceIcon = '<i class="fas fa-thumbs-up" style="color: green;"></i>';
-              } else if(Number(data.marks) < 60) {
+              } else if (Number(data.marks) < 60) {
                 performanceIcon = '<i class="fas fa-exclamation-triangle" style="color: red;"></i>';
               }
               const row = document.createElement("tr");
@@ -898,17 +889,17 @@
                 <td>${data.grade}</td>
                 <td>${performanceIcon}</td>
               `;
-              reportCardBody.appendChild(row);
+              tbody.appendChild(row);
               totalMarks += Number(data.marks);
-              subjectCount++;
+              count++;
             }
-            if (subjectCount > 0) {
-              const averageMarks = (totalMarks / subjectCount).toFixed(2);
-              const averageRow = document.createElement("tr");
-              averageRow.innerHTML = `<td colspan="4"><strong>Average Marks: ${averageMarks}</strong></td>`;
-              reportCardBody.appendChild(averageRow);
+            if (count > 0) {
+              const avg = (totalMarks / count).toFixed(2);
+              const row = document.createElement("tr");
+              row.innerHTML = `<td colspan="4"><strong>Average Marks: ${avg}</strong></td>`;
+              tbody.appendChild(row);
             } else {
-              reportCardBody.innerHTML = "<tr><td colspan='4'>You have no report card available yet. Please check back later.</td></tr>";
+              tbody.innerHTML = "<tr><td colspan='4'>You have no report card available yet. Please check back later.</td></tr>";
             }
             updateChart(marks);
           } else {
@@ -918,7 +909,7 @@
           console.error("Error loading results:", error);
           showMessage("Error loading results: " + error.message, "error");
         }
-      };
+      }
 
       // Export report card as PDF
       window.exportPDF = () => {
@@ -959,8 +950,8 @@
         doc.save("stmarys_student_report_card.pdf");
       };
 
-      // Load latest notice for homepage "Notices" card
-      const loadNotices = async () => {
+      // Load latest notice for "Notices" card
+      async function loadNotices() {
         try {
           const updatesQuery = query(
             collection(db, "updates"),
@@ -978,24 +969,25 @@
           console.error("Error loading notices:", error);
           document.getElementById("notices").textContent = "Error loading notices.";
         }
-      };
+      }
 
-      // Load updates for the "Current Updates" section with transitions and update badge count
-      const loadUpdates = async () => {
+      // Load updates and count only unread ones
+      async function loadUpdates() {
         try {
+          const currentEmail = auth.currentUser.email;
           const updatesQuery = query(
             collection(db, "updates"),
             orderBy("timestamp", "desc")
           );
           const querySnapshot = await getDocs(updatesQuery);
           let updatesHtml = "";
-          let count = querySnapshot.size;
-          querySnapshot.forEach((docSnap, index) => {
+          let unreadCount = 0;
+          querySnapshot.forEach((docSnap) => {
             const update = docSnap.data();
-            // Highlight the first (most recent) update with a slightly different background
-            let extraStyle = index === 0 ? 'background: rgba(0,0,0,0.2);' : '';
+            const isRead = update.readBy && update.readBy.includes(currentEmail);
+            if (!isRead) { unreadCount++; }
             updatesHtml += `
-              <div class="notice-card" onclick="markUpdateAsRead(this)">
+              <div class="notice-card" data-id="${docSnap.id}" onclick="markUpdateAsRead(this)">
                 <h3>${update.updateTitle || "No Title"}</h3>
                 <p>${update.updateContent || ""}</p>
                 <small>Posted by ${update.teacherName || "Unknown"} on ${update.timestamp ? new Date(update.timestamp.seconds * 1000).toLocaleString() : "unknown"}</small>
@@ -1003,12 +995,10 @@
             `;
           });
           document.getElementById("updatesList").innerHTML = updatesHtml || "<p>No updates available.</p>";
-          // Update badge count only if there are new updates (simulate by always showing count until updates are viewed)
           const updateCountElem = document.getElementById("updateCount");
-          if (count > 0) {
-            updateCountElem.textContent = count;
+          if (unreadCount > 0) {
+            updateCountElem.textContent = unreadCount;
             updateCountElem.style.display = "inline-block";
-            // Show a toast notification for new updates
             Swal.fire({
               toast: true,
               position: 'top-end',
@@ -1024,84 +1014,49 @@
           console.error("Error loading updates:", error);
           document.getElementById("updatesList").innerHTML = "<p>Error loading updates.</p>";
         }
-      };
+      }
 
-      // When an update is clicked, mark it as read (fade it out) and clear badge
-      window.markUpdateAsRead = (updateElem) => {
-        updateElem.style.opacity = "0.5";
-        setTimeout(() => {
-          updateElem.style.display = "none";
-          document.getElementById("updateCount").style.display = "none";
-        }, 500);
-      };
-
-      // Save/Update student data from Personal Info page
-      const saveStudentData = async () => {
+      // Mark individual update as read (update Firestore) and refresh updates
+      window.markUpdateAsRead = async (updateElem) => {
+        const updateId = updateElem.getAttribute("data-id");
+        const currentEmail = auth.currentUser.email;
         try {
-          const email = auth.currentUser.email;
-          const studentRef = doc(db, "students", email);
-          const studentData = {
-            firstname: document.getElementById("name").value,
-            surname: document.getElementById("surname").value,
-            phone: document.getElementById("phone").value,
-            email: email,
-            parentName: document.getElementById("parent-name").value,
-            parentPhone: document.getElementById("parent-phone").value,
-            dob: document.getElementById("dob").value,
-            gender: document.getElementById("gender").value,
-            address: document.getElementById("address").value,
-            form: document.getElementById("form").value,
-            stream: document.getElementById("stream").value,
-            healthIssues: document.getElementById("healthIssues").value,
-            additionalInfo: document.getElementById("additionalInfo").value,
-            lastUpdated: new Date()
-          };
-          await setDoc(studentRef, studentData, { merge: true });
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Profile updated successfully!',
-            timer: 2000,
-            showConfirmButton: false
-          });
-          if (studentData.form && studentData.stream) {
-            document.getElementById("currentGrade").textContent = `${studentData.form} - ${studentData.stream}`;
-          } else {
-            document.getElementById("currentGrade").textContent = "Not set";
+          await updateDoc(doc(db, "updates", updateId), { readBy: arrayUnion(currentEmail) });
+          updateElem.style.opacity = "0.5";
+          setTimeout(() => { updateElem.style.display = "none"; }, 500);
+          loadUpdates();
+        } catch (error) {
+          console.error("Error marking update as read:", error);
+        }
+      };
+
+      // "Mark All as Read" button functionality
+      document.getElementById("markAllReadBtn").addEventListener("click", async () => {
+        const currentEmail = auth.currentUser.email;
+        const updatesQuery = query(collection(db, "updates"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(updatesQuery);
+        querySnapshot.forEach(async (docSnap) => {
+          try {
+            await updateDoc(doc(db, "updates", docSnap.id), { readBy: arrayUnion(currentEmail) });
+          } catch (error) {
+            console.error("Error marking update as read:", error);
           }
-        } catch (error) {
-          console.error("Error saving student data:", error);
-          showMessage("Error saving student data: " + error.message, "error");
-        }
-      };
+        });
+        document.getElementById("updateCount").style.display = "none";
+        document.querySelectorAll(".notice-card").forEach(card => {
+          card.style.opacity = "0.5";
+        });
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'All updates marked as read!',
+          showConfirmButton: false,
+          timer: 3000
+        });
+      });
 
-      // Reset Password
-      const resetPassword = async () => {
-        const userEmail = auth.currentUser.email;
-        try {
-          await sendPasswordResetEmail(auth, userEmail);
-          showMessage("Password reset email sent! Check your inbox.", "success");
-        } catch (error) {
-          console.error("Error resetting password:", error);
-          showMessage("Error resetting password: " + error.message, "error");
-        }
-      };
-
-      // Logout function
-      const logout = async () => {
-        try {
-          await signOut(auth);
-          window.location.href = "/login";
-        } catch (error) {
-          console.error("Logout error:", error);
-        }
-      };
-
-      document.getElementById("saveChangesBtn").addEventListener("click", saveStudentData);
-      document.getElementById("logoutBtn").addEventListener("click", logout);
-      document.getElementById("changePasswordBtn").addEventListener("click", resetPassword);
-
-      // Upload new profile picture with progress display
+      // Upload profile picture with progress
       document.getElementById("profilePicInput").addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -1140,11 +1095,25 @@
       // Side Menu Controls
       const menuBtn = document.getElementById("menuBtn");
       const sideMenu = document.getElementById("sideMenu");
+      const menuOverlay = document.getElementById("menuOverlay");
       const closeBtn = document.getElementById("closeBtn");
-      menuBtn.addEventListener("click", () => { sideMenu.classList.add("active"); });
-      closeBtn.addEventListener("click", () => { sideMenu.classList.remove("active"); });
+      menuBtn.addEventListener("click", () => {
+        sideMenu.classList.add("active");
+        menuOverlay.style.display = "block";
+      });
+      closeBtn.addEventListener("click", () => {
+        sideMenu.classList.remove("active");
+        menuOverlay.style.display = "none";
+      });
+      menuOverlay.addEventListener("click", () => {
+        sideMenu.classList.remove("active");
+        menuOverlay.style.display = "none";
+      });
       document.addEventListener("click", (e) => {
-        if (!sideMenu.contains(e.target) && !menuBtn.contains(e.target)) { sideMenu.classList.remove("active"); }
+        if (!sideMenu.contains(e.target) && !menuBtn.contains(e.target) && e.target.id !== "menuOverlay") {
+          sideMenu.classList.remove("active");
+          menuOverlay.style.display = "none";
+        }
       });
 
       // Menu Links - Section Switching
@@ -1158,9 +1127,9 @@
             sec.classList.add("fade-in");
           });
           sideMenu.classList.remove("active");
+          menuOverlay.style.display = "none";
           if (targetId === "updates") {
             loadUpdates();
-            // When updates are viewed, clear badge
             document.getElementById("updateCount").style.display = "none";
           }
           if (targetId === "results") {
@@ -1188,7 +1157,8 @@
           ? '<i class="fas fa-moon"></i>'
           : '<i class="fas fa-sun"></i>';
       }
-      // Handle Navigation for the "Send Report" Link
+
+      // "Send Report" link
       const reportLink = document.querySelector('.menu-links a[href="/report"]');
       if (reportLink) {
         reportLink.addEventListener("click", (e) => {
@@ -1197,7 +1167,7 @@
         });
       }
 
-      // Auth state observer
+      // Auth State Observer
       onAuthStateChanged(auth, (user) => {
         if (user) {
           fetchStudentData(user.email);
@@ -1209,7 +1179,6 @@
         }
       });
     </script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   </body>

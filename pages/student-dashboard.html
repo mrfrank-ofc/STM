@@ -21,7 +21,7 @@
       type="image/png"
       href="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg"
     />
-    <!-- Chart.js (Added to fix "Chart not defined" error) -->
+    <!-- Chart.js (for performance graph) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- jsPDF Library and AutoTable Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -29,7 +29,7 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      /* General Styles */
+      /* Basic and color variables */
       :root {
         --primary: #003366;
         --secondary: #ffd700;
@@ -41,7 +41,7 @@
       [data-theme="light"] {
         --primary: #00b4db;
         --secondary: #0083b0;
-        --glass: rgba(0, 0, 0, 0.05);
+        --glass: rgba(255, 255, 255, 0.95);
         --bg-gradient: linear-gradient(45deg, #e0f7fa, #b2ebf2);
         --text-color: #1c1917;
         --overlay: rgba(255, 255, 255, 0.4);
@@ -52,6 +52,14 @@
         box-sizing: border-box;
         font-family: "Poppins", sans-serif;
       }
+      /* Fade-in animation for sections */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
       body {
         overflow: auto;
         user-select: none;
@@ -59,7 +67,7 @@
         color: var(--text-color);
         min-height: 100vh;
         transition: background 0.6s ease, color 0.6s ease;
-        padding-bottom: 80px; /* for fixed footer */
+        padding-bottom: 80px;
       }
       body::after {
         content: "";
@@ -196,6 +204,23 @@
         font-size: 1.2rem;
         color: var(--text-color);
       }
+      /* Attendance Card */
+      .card.attendance {
+        position: relative;
+      }
+      .attendance-bar {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        overflow: hidden;
+        margin: 10px 0;
+      }
+      .attendance-progress {
+        height: 10px;
+        width: 0%;
+        background: var(--secondary);
+        transition: width 0.5s ease;
+      }
       /* Personal Info Form */
       .profile-pic {
         width: 150px;
@@ -215,7 +240,8 @@
         color: var(--primary);
       }
       .form-group input,
-      .form-group select {
+      .form-group select,
+      .form-group textarea {
         width: 100%;
         padding: 0.75rem;
         border: 1px solid #ccc;
@@ -225,7 +251,8 @@
         color: var(--text-color);
       }
       .form-group input:focus,
-      .form-group select:focus {
+      .form-group select:focus,
+      .form-group textarea:focus {
         border-color: var(--primary);
         outline: none;
       }
@@ -242,9 +269,15 @@
       .form-group button:hover {
         background: #002244;
       }
-      /* Part B: Additional Personal Info (Form and Class) */
-      /* (Select options remain unchanged) */
-      /* View Results Section - Updated */
+      /* Extra fields for Health Issues and Additional Information */
+      .extra-info {
+        margin-top: 1rem;
+      }
+      .extra-info label {
+        font-weight: 500;
+        color: var(--primary);
+      }
+      /* View Results Section */
       #results .report-card,
       #results #resultsMessage {
         background: var(--glass);
@@ -268,6 +301,7 @@
         margin-bottom: 1rem;
         color: var(--primary);
       }
+      /* Update the table to include a Performance column */
       #results table {
         width: 100%;
         border-collapse: collapse;
@@ -281,6 +315,10 @@
       #results th {
         background: var(--primary);
         color: #fff;
+      }
+      /* Zebra stripes for report card table */
+      #results table tr:nth-child(even) {
+        background: rgba(0, 0, 0, 0.1);
       }
       .pdf-btn {
         display: inline-block;
@@ -296,7 +334,7 @@
       }
       .pdf-btn:hover {
         transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       }
       .chart-container {
         width: 100%;
@@ -319,17 +357,52 @@
         opacity: 1;
         transform: translateY(0);
       }
-      /* Make teacher comments text green */
-      #reportTeacherComments {
-        color: green;
+      /* Highlight teacher comments */
+      .highlight-comments {
+        background: rgba(0, 255, 0, 0.1);
+        padding: 2px 4px;
+        border-radius: 4px;
       }
-      /* Updates/Notices Section */
+      /* Updates Section */
+      #updates h2 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+      }
+      /* Bell icon with badge */
+      #updates h2 i#updatesBell {
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+      #updateCount {
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+        margin-left: 5px;
+        display: inline-block;
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+      }
       .notice-card {
         background: var(--glass);
         padding: 1rem;
         border-radius: 8px;
         margin-bottom: 1rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideIn 0.5s forwards;
+      }
+      @keyframes slideIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       .notice-card small {
         font-size: 0.9rem;
@@ -355,7 +428,7 @@
       .social-icons a:hover {
         color: var(--secondary);
       }
-      /* Theme Toggle (Circular) */
+      /* Theme Toggle */
       .theme-toggle {
         position: fixed;
         bottom: 30px;
@@ -399,24 +472,15 @@
       #personal-info h2 {
         font-size: 2rem;
       }
-      /* Updates Section - Bell Icon */
-      #updates {
-        position: relative;
+      /* Additional fields styling */
+      .extra-info {
+        margin-top: 1rem;
       }
-      #updatesBell {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 1.5rem;
-        animation: shake 0.5s ease-in-out 3;
+      .extra-info label {
+        font-weight: 500;
+        color: var(--primary);
       }
-      @keyframes shake {
-        0% { transform: rotate(0deg); }
-        25% { transform: rotate(10deg); }
-        50% { transform: rotate(0deg); }
-        75% { transform: rotate(-10deg); }
-        100% { transform: rotate(0deg); }
-      }
+      /* Responsive Side Menu */
       @media (max-width: 768px) {
         .side-menu {
           width: 100%;
@@ -428,45 +492,40 @@
   <body>
     <!-- Header -->
     <header>
-      <div class="logo">
-        <img
-          src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg"
-          alt="Logo"
-          class="header-logo"
-        />
+      <div class="logo fade-in">
+        <img src="https://i.postimg.cc/mZ81jqGW/In-Shot-20250227-051117557.jpg" alt="Logo" class="header-logo" />
         St. Mary's High
       </div>
-      <button class="menu-btn" id="menuBtn">
-        <i class="fas fa-bars"></i>
-      </button>
+      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
     </header>
 
     <!-- Side Menu -->
-    <div class="side-menu" id="sideMenu">
+    <div class="side-menu fade-in" id="sideMenu">
       <div class="menu-header">
         <h3>Menu</h3>
-        <button class="close-btn" id="closeBtn">
-          <i class="fas fa-times"></i>
-        </button>
+        <button class="close-btn" id="closeBtn"><i class="fas fa-times"></i></button>
       </div>
       <div class="menu-links">
         <a href="#dashboard-home"><i class="fas fa-home"></i> Dashboard</a>
         <a href="#personal-info"><i class="fas fa-user"></i> Personal Info</a>
         <a href="#results"><i class="fas fa-chart-bar"></i> View Results</a>
-        <a href="#updates"><i class="fas fa-bell"></i> Current Updates</a>
+        <a href="#updates">
+          <i class="fas fa-bell" id="updatesBell"></i>
+          Current Updates
+          <span id="updateCount"></span>
+        </a>
         <a href="/report"><i class="fas fa-share"></i> Send Report</a>
         <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="container">
+    <div class="container fade-in">
       <!-- Message Box -->
       <div id="messageBox"></div>
 
       <!-- Dashboard Home -->
-      <section id="dashboard-home">
-        <!-- Welcome message: name will be updated by JS -->
+      <section id="dashboard-home" class="fade-in">
         <h2 id="welcomeMessage">Hello, Student 😊</h2>
         <div class="dashboard-cards">
           <div class="card">
@@ -477,21 +536,28 @@
             <h3>Notices</h3>
             <p id="notices">Loading notices...</p>
           </div>
+          <div class="card attendance">
+            <h3>Attendance</h3>
+            <div class="attendance-bar">
+              <div class="attendance-progress" id="attendanceProgress"></div>
+            </div>
+            <p id="attendanceText">Not available</p>
+          </div>
         </div>
       </section>
 
       <!-- Personal Info Page -->
-      <section id="personal-info" style="display: none;">
+      <section id="personal-info" class="fade-in" style="display: none;">
         <h2 id="personalInfoHeading">Personal Information</h2>
         <div class="form-group">
           <label for="profile-pic">Profile Picture</label>
-          <img
-            src="https://i.postimg.cc/28gm27sy/2993763.png"
-            alt="Profile Picture"
-            class="profile-pic"
-            id="profilePic"
-          />
+          <img src="https://i.postimg.cc/28gm27sy/2993763.png" alt="Profile Picture" class="profile-pic" id="profilePic" />
           <input type="file" id="profilePicInput" accept="image/*" />
+          <!-- Progress bar with percentage -->
+          <div id="uploadProgress" style="display:none; margin-top:5px; background: #ccc; border-radius: 5px;">
+            <div id="progressBar" style="height: 10px; width: 0%; background: green; border-radius: 5px;"></div>
+          </div>
+          <div id="progressText" style="text-align:center; font-size:0.8rem; margin-top:3px;"></div>
           <p id="studentDisplayName"></p>
         </div>
         <div class="form-group">
@@ -533,7 +599,16 @@
           <label for="address">Address/Location</label>
           <input type="text" id="address" placeholder="Enter your address" />
         </div>
-        <!-- Part B: Additional form groups for updating personal info -->
+        <!-- Additional fields -->
+        <div class="form-group extra-info">
+          <label for="healthIssues">Health Issues</label>
+          <textarea id="healthIssues" placeholder="Enter any health issues..."></textarea>
+        </div>
+        <div class="form-group extra-info">
+          <label for="additionalInfo">Additional Information</label>
+          <textarea id="additionalInfo" placeholder="Enter any additional information..."></textarea>
+        </div>
+        <!-- Part B: Additional Personal Info -->
         <div class="form-group">
           <label for="form">Form</label>
           <select id="form">
@@ -566,8 +641,8 @@
         </div>
       </section>
 
-      <!-- View Results Page (Updated) -->
-      <section id="results" style="display: none;">
+      <!-- View Results Page -->
+      <section id="results" class="fade-in" style="display: none;">
         <h2>View Results</h2>
         <!-- Message for unpaid fees -->
         <div id="resultsMessage"></div>
@@ -579,7 +654,7 @@
             <p>Year: <span id="reportYear"></span></p>
             <p>Term: <span id="reportTerm"></span></p>
             <p>Teacher: <span id="reportTeacherName"></span></p>
-            <p>Comments: <span id="reportTeacherComments"></span></p>
+            <p>Comments: <span id="reportTeacherComments" class="highlight-comments"></span></p>
           </div>
           <h3>Report Card</h3>
           <table>
@@ -588,10 +663,11 @@
                 <th>Subject</th>
                 <th>Marks</th>
                 <th>Grade</th>
+                <th>Performance</th>
               </tr>
             </thead>
             <tbody id="reportCardBody">
-              <!-- Dynamically populated report card rows -->
+              <!-- Report rows will be inserted here -->
             </tbody>
           </table>
           <button class="pdf-btn" onclick="exportPDF()">Download PDF</button>
@@ -602,9 +678,11 @@
       </section>
 
       <!-- Current Updates Section -->
-      <section id="updates" style="display: none;">
-        <i class="fas fa-bell" id="updatesBell"></i>
-        <h2>Current Updates</h2>
+      <section id="updates" class="fade-in" style="display: none;">
+        <h2>
+          <i class="fas fa-bell" id="updatesBell"></i> Current Updates
+          <span id="updateCount"></span>
+        </h2>
         <div id="updatesList">
           <p>Loading updates...</p>
         </div>
@@ -612,7 +690,7 @@
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer class="fade-in">
       <div class="social-icons">
         <a href="#"><i class="fab fa-facebook"></i></a>
         <a href="#"><i class="fab fa-instagram"></i></a>
@@ -622,12 +700,12 @@
       <p>&copy; 2025 St. Mary's High School. All rights reserved.</p>
     </footer>
 
-    <!-- Theme Toggle (Circular) -->
-    <div class="theme-toggle" id="themeToggle">
+    <!-- Theme Toggle -->
+    <div class="theme-toggle fade-in" id="themeToggle">
       <i class="fas fa-moon"></i>
     </div>
 
-    <!-- Firebase SDK and App Scripts -->
+    <!-- Firebase and App Scripts -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import {
@@ -665,7 +743,7 @@
       const db = getFirestore(appFirebase);
       const storage = getStorage(appFirebase);
 
-      // Utility: Show message in message box (in addition to SweetAlert2)
+      // Utility: Show message in message box
       function showMessage(message, type) {
         const messageBox = document.getElementById("messageBox");
         messageBox.textContent = message;
@@ -683,12 +761,11 @@
         return s.charAt(0).toUpperCase() + s.slice(1);
       }
 
-      // Function to update the performance chart using Chart.js
+      // Update performance chart
       function updateChart(marksData) {
         const ctx = document.getElementById("performanceChart").getContext("2d");
         const subjects = Object.keys(marksData);
         const marks = subjects.map(subject => marksData[subject].marks);
-        // If a previous chart exists, destroy it
         if (window.performanceChartInstance) {
           window.performanceChartInstance.destroy();
         }
@@ -712,7 +789,7 @@
         });
       }
 
-      // Fetch student data for Personal Info and update dashboard grade card
+      // Fetch student data and update dashboard info
       const fetchStudentData = async (email) => {
         try {
           const studentRef = doc(db, "students", email);
@@ -730,21 +807,29 @@
             document.getElementById("address").value = studentData.address || "";
             document.getElementById("form").value = studentData.form || "";
             document.getElementById("stream").value = studentData.stream || "";
+            document.getElementById("healthIssues").value = studentData.healthIssues || "";
+            document.getElementById("additionalInfo").value = studentData.additionalInfo || "";
             document.getElementById("profilePic").src =
               studentData.profilePic ||
               "https://i.ibb.co/ynzs0qc2/subzero-bot.jpg";
             document.getElementById("studentDisplayName").textContent = studentData.firstname || "";
-            // Set welcome message with first-letter capitalized and smiley emoji
             const studentName = capitalize(studentData.firstname);
             document.getElementById("welcomeMessage").textContent = `Hello, ${studentName} 😊`;
-            // Update personal info heading to include student's name
             document.getElementById("personalInfoHeading").textContent = `Personal Information (${studentData.firstname || "Student"})`;
-            // Update current grade card using form and stream; display "Not set" if missing
             if (studentData.form && studentData.stream) {
               document.getElementById("currentGrade").textContent = `${studentData.form} - ${studentData.stream}`;
             } else {
               document.getElementById("currentGrade").textContent = "Not set";
               showMessage("Your personal info is incomplete. Please update your grade & class info in your profile.", "error");
+            }
+            // Update attendance progress if available
+            if (studentData.attendance !== undefined) {
+              const attendanceProgress = document.getElementById("attendanceProgress");
+              attendanceProgress.style.width = studentData.attendance + "%";
+              document.getElementById("attendanceText").textContent = `Attendance: ${studentData.attendance}%`;
+              if (studentData.attendance < 75) {
+                showMessage("Your attendance is below 75%. Please strive for better attendance.", "error");
+              }
             }
           } else {
             const defaultName = auth.currentUser.email.split('@')[0];
@@ -758,23 +843,23 @@
         }
       };
 
-      // Load results for the "View Results" section and compute average marks
+      // Load results and update report card
       const loadResults = async () => {
         try {
           const studentEmail = auth.currentUser.email;
           const studentRef = doc(db, "students", studentEmail);
           const studentSnap = await getDoc(studentRef);
-
           if (studentSnap.exists()) {
             const studentData = studentSnap.data();
             const marks = studentData.marks || {};
-
-            // Check if fees have been paid; if not, display a styled message with transitions
+            // Check fees status and show message if unpaid
             if (!studentData.feesPaid) {
               const resultsMessage = document.getElementById("resultsMessage");
-              resultsMessage.textContent =
-                `Dear ${studentData.firstname}, you have a fees balance of ${studentData.feesBalance} as of ${studentData.year || "N/A"} ${studentData.term || "N/A"}. Please pay to view results. 
-Cc Team St Mary's Admin.`;
+              resultsMessage.innerHTML = `
+                Dear ${studentData.firstname},<br/><br/>
+                Sorry to say you can't view your results as you have a fees balance of $<span style="color:red;">${studentData.feesBalance}</span> as of ${studentData.year || "N/A"} ${studentData.term || "N/A"}. Please pay your fees to avoid any inconvenience. Thank you!<br/><br/>
+                <span style="color:green;">Yours, Team St Mary's Admin</span>
+              `;
               resultsMessage.classList.add("show");
               document.getElementById("reportCardContainer").style.display = "none";
               return;
@@ -782,58 +867,52 @@ Cc Team St Mary's Admin.`;
               document.getElementById("resultsMessage").classList.remove("show");
               document.getElementById("reportCardContainer").style.display = "block";
             }
-
-            // Update report header with teacher details as well
-            document.getElementById("reportName").textContent =
-              `${studentData.firstname || ""} ${studentData.surname || ""}`;
-            document.getElementById("reportEmail").textContent =
-              studentData.email || "";
-            document.getElementById("reportYear").textContent =
-              studentData.year || "Not set";
-            document.getElementById("reportTerm").textContent =
-              studentData.term || "Not set";
-            document.getElementById("reportTeacherName").textContent =
-              studentData.teacherName || "N/A";
-            document.getElementById("reportTeacherComments").textContent =
-              studentData.teacherComments || "N/A";
-
-            // Clear existing rows
+            document.getElementById("reportName").textContent = `${studentData.firstname || ""} ${studentData.surname || ""}`;
+            document.getElementById("reportEmail").textContent = studentData.email || "";
+            document.getElementById("reportYear").textContent = studentData.year || "Not set";
+            document.getElementById("reportTerm").textContent = studentData.term || "Not set";
+            document.getElementById("reportTeacherName").textContent = studentData.teacherName || "N/A";
+            document.getElementById("reportTeacherComments").textContent = studentData.teacherComments || "N/A";
+            // Highlight teacher comments if available
+            if(studentData.teacherComments && studentData.teacherComments !== "N/A") {
+              document.getElementById("reportTeacherComments").classList.add("highlight-comments");
+            } else {
+              document.getElementById("reportTeacherComments").classList.remove("highlight-comments");
+            }
             const reportCardBody = document.getElementById("reportCardBody");
             reportCardBody.innerHTML = "";
-
-            // Add rows for each subject and compute total marks
             let totalMarks = 0;
             let subjectCount = 0;
+            // For each subject, add an extra cell for performance icon
             for (const [subject, data] of Object.entries(marks)) {
+              let performanceIcon = "";
+              if(Number(data.marks) >= 90) {
+                performanceIcon = '<i class="fas fa-thumbs-up" style="color: green;"></i>';
+              } else if(Number(data.marks) < 60) {
+                performanceIcon = '<i class="fas fa-exclamation-triangle" style="color: red;"></i>';
+              }
               const row = document.createElement("tr");
               row.innerHTML = `
                 <td>${subject}</td>
                 <td>${data.marks}</td>
                 <td>${data.grade}</td>
+                <td>${performanceIcon}</td>
               `;
               reportCardBody.appendChild(row);
               totalMarks += Number(data.marks);
               subjectCount++;
             }
-
-            // Compute and add average marks row if subjects exist
             if (subjectCount > 0) {
               const averageMarks = (totalMarks / subjectCount).toFixed(2);
               const averageRow = document.createElement("tr");
-              averageRow.innerHTML = `
-                <td colspan="3"><strong>Average Marks: ${averageMarks}</strong></td>
-              `;
+              averageRow.innerHTML = `<td colspan="4"><strong>Average Marks: ${averageMarks}</strong></td>`;
               reportCardBody.appendChild(averageRow);
             } else {
-              reportCardBody.innerHTML =
-                "<tr><td colspan='3'>No marks available.</td></tr>";
+              reportCardBody.innerHTML = "<tr><td colspan='4'>You have no report card available yet. Please check back later.</td></tr>";
             }
-
-            // Update performance graph using the new updateChart function
             updateChart(marks);
           } else {
-            document.getElementById("reportCardBody").innerHTML =
-              "<tr><td colspan='3'>No data found.</td></tr>";
+            document.getElementById("reportCardBody").innerHTML = "<tr><td colspan='4'>No data found.</td></tr>";
           }
         } catch (error) {
           console.error("Error loading results:", error);
@@ -841,19 +920,16 @@ Cc Team St Mary's Admin.`;
         }
       };
 
-      // Export report card as PDF using jsPDF and autoTable
+      // Export report card as PDF
       window.exportPDF = () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-
-        // Add header details
         const name = document.getElementById("reportName").textContent;
         const email = document.getElementById("reportEmail").textContent;
         const year = document.getElementById("reportYear").textContent;
         const term = document.getElementById("reportTerm").textContent;
         const teacherName = document.getElementById("reportTeacherName").textContent;
         const teacherComments = document.getElementById("reportTeacherComments").textContent;
-
         doc.setFontSize(12);
         doc.text(`Name: ${name}`, 14, 15);
         doc.text(`Email: ${email}`, 14, 25);
@@ -861,37 +937,25 @@ Cc Team St Mary's Admin.`;
         doc.text(`Term: ${term}`, 14, 45);
         doc.text(`Teacher: ${teacherName}`, 14, 55);
         doc.text(`Comments: ${teacherComments}`, 14, 65);
-
-        // Prepare table rows from reportCardBody
         let rows = [];
         document.querySelectorAll("#reportCardBody tr").forEach((tr) => {
-          const cells = Array.from(tr.querySelectorAll("td")).map(
-            (td) => td.textContent
-          );
+          const cells = Array.from(tr.querySelectorAll("td")).map(td => td.textContent);
           rows.push(cells);
         });
-
         doc.autoTable({
-          head: [["Subject", "Marks", "Grade"]],
+          head: [["Subject", "Marks", "Grade", "Performance"]],
           body: rows,
           startY: 75,
         });
-
-        // Generate a serial number based on current timestamp
         const serial = "SN-" + Date.now();
         const signatureY = doc.lastAutoTable.finalY + 20;
-
-        // Add school signature block as text only
         doc.setFontSize(10);
         doc.text("School: St. Mary's High School", 14, signatureY);
         doc.text("Contact: +263 719 647303", 14, signatureY + 7);
         doc.text("Address: Zengeza, Mubvumira Rd, Chitungwiza, Zimbabwe", 14, signatureY + 14);
         doc.text("Serial Number: " + serial, 14, signatureY + 21);
-
-        // Add comment below signature info
         const commentY = signatureY + 30;
         doc.text("Good marks!", 14, commentY);
-
         doc.save("stmarys_student_report_card.pdf");
       };
 
@@ -916,7 +980,7 @@ Cc Team St Mary's Admin.`;
         }
       };
 
-      // Load updates for the "Current Updates" section
+      // Load updates for the "Current Updates" section with transitions and update badge count
       const loadUpdates = async () => {
         try {
           const updatesQuery = query(
@@ -925,22 +989,50 @@ Cc Team St Mary's Admin.`;
           );
           const querySnapshot = await getDocs(updatesQuery);
           let updatesHtml = "";
-          querySnapshot.forEach((docSnap) => {
+          let count = querySnapshot.size;
+          querySnapshot.forEach((docSnap, index) => {
             const update = docSnap.data();
+            // Highlight the first (most recent) update with a slightly different background
+            let extraStyle = index === 0 ? 'background: rgba(0,0,0,0.2);' : '';
             updatesHtml += `
-              <div class="notice-card">
+              <div class="notice-card" onclick="markUpdateAsRead(this)">
                 <h3>${update.updateTitle || "No Title"}</h3>
                 <p>${update.updateContent || ""}</p>
                 <small>Posted by ${update.teacherName || "Unknown"} on ${update.timestamp ? new Date(update.timestamp.seconds * 1000).toLocaleString() : "unknown"}</small>
               </div>
             `;
           });
-          document.getElementById("updatesList").innerHTML =
-            updatesHtml || "<p>No updates available.</p>";
+          document.getElementById("updatesList").innerHTML = updatesHtml || "<p>No updates available.</p>";
+          // Update badge count only if there are new updates (simulate by always showing count until updates are viewed)
+          const updateCountElem = document.getElementById("updateCount");
+          if (count > 0) {
+            updateCountElem.textContent = count;
+            updateCountElem.style.display = "inline-block";
+            // Show a toast notification for new updates
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'info',
+              title: 'You have new updates!',
+              showConfirmButton: false,
+              timer: 3000
+            });
+          } else {
+            updateCountElem.style.display = "none";
+          }
         } catch (error) {
           console.error("Error loading updates:", error);
           document.getElementById("updatesList").innerHTML = "<p>Error loading updates.</p>";
         }
+      };
+
+      // When an update is clicked, mark it as read (fade it out) and clear badge
+      window.markUpdateAsRead = (updateElem) => {
+        updateElem.style.opacity = "0.5";
+        setTimeout(() => {
+          updateElem.style.display = "none";
+          document.getElementById("updateCount").style.display = "none";
+        }, 500);
       };
 
       // Save/Update student data from Personal Info page
@@ -960,6 +1052,8 @@ Cc Team St Mary's Admin.`;
             address: document.getElementById("address").value,
             form: document.getElementById("form").value,
             stream: document.getElementById("stream").value,
+            healthIssues: document.getElementById("healthIssues").value,
+            additionalInfo: document.getElementById("additionalInfo").value,
             lastUpdated: new Date()
           };
           await setDoc(studentRef, studentData, { merge: true });
@@ -1007,11 +1101,22 @@ Cc Team St Mary's Admin.`;
       document.getElementById("logoutBtn").addEventListener("click", logout);
       document.getElementById("changePasswordBtn").addEventListener("click", resetPassword);
 
-      // Upload new profile picture using FileReader and store as Base64 string in Firestore
+      // Upload new profile picture with progress display
       document.getElementById("profilePicInput").addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
+        const progressContainer = document.getElementById("uploadProgress");
+        const progressBar = document.getElementById("progressBar");
+        const progressText = document.getElementById("progressText");
+        progressContainer.style.display = "block";
+        reader.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            progressBar.style.width = percent + "%";
+            progressText.textContent = percent + "%";
+          }
+        };
         reader.onload = async (event) => {
           const base64String = event.target.result;
           const user = auth.currentUser;
@@ -1025,6 +1130,9 @@ Cc Team St Mary's Admin.`;
             console.error("Error updating profile picture:", error);
             showMessage("Error updating profile picture: " + error.message, "error");
           }
+          progressBar.style.width = "0%";
+          progressText.textContent = "";
+          progressContainer.style.display = "none";
         };
         reader.readAsDataURL(file);
       });
@@ -1033,16 +1141,10 @@ Cc Team St Mary's Admin.`;
       const menuBtn = document.getElementById("menuBtn");
       const sideMenu = document.getElementById("sideMenu");
       const closeBtn = document.getElementById("closeBtn");
-      menuBtn.addEventListener("click", () => {
-        sideMenu.classList.add("active");
-      });
-      closeBtn.addEventListener("click", () => {
-        sideMenu.classList.remove("active");
-      });
+      menuBtn.addEventListener("click", () => { sideMenu.classList.add("active"); });
+      closeBtn.addEventListener("click", () => { sideMenu.classList.remove("active"); });
       document.addEventListener("click", (e) => {
-        if (!sideMenu.contains(e.target) && !menuBtn.contains(e.target)) {
-          sideMenu.classList.remove("active");
-        }
+        if (!sideMenu.contains(e.target) && !menuBtn.contains(e.target)) { sideMenu.classList.remove("active"); }
       });
 
       // Menu Links - Section Switching
@@ -1053,10 +1155,13 @@ Cc Team St Mary's Admin.`;
           const targetId = link.getAttribute("href").substring(1);
           document.querySelectorAll("section").forEach((sec) => {
             sec.style.display = sec.id === targetId ? "block" : "none";
+            sec.classList.add("fade-in");
           });
           sideMenu.classList.remove("active");
           if (targetId === "updates") {
             loadUpdates();
+            // When updates are viewed, clear badge
+            document.getElementById("updateCount").style.display = "none";
           }
           if (targetId === "results") {
             loadResults();
